@@ -73,17 +73,24 @@
         }
     </style>
     <script>
-        function oepnclose(){
+        $(document).ready(function () {
+            let url = "http://spartacodingclub.shop/sparta_api/seoulair";
+            fetch(url).then(res => res.json()).then(data => {
+                let mise = data['RealtimeCityAir']['row'][0]['IDEX_NM'];
+                $('#msg').text(mise);
+            })
+        })
+        function oepnclose() {
             $('#postingbox').toggle();
         }
 
-        function makeCard(){
-           let image = $('#image').val(); // id 값을 통해 값을 가져온다. val()함수
-           let title = $('#title').val();
-           let content = $('#content').val();
-           let date = $('#date').val();
+        function makeCard() {
+            let image = $('#image').val(); // id 값을 통해 값을 가져온다. val()함수
+            let title = $('#title').val();
+            let content = $('#content').val();
+            let date = $('#date').val();
 
-           let temp_html = `
+            let temp_html = `
            <div class="col">
                 <div class="card h-100">
                     <img src="${image}"
@@ -105,7 +112,8 @@
 <body>
     <div class="mytitle">
         <h1>나만의 추억앨범</h1>
-        <button onclick = "oepnclose()">추억 저장하기</button>
+        <p>현재 서울의 미세먼지 : <span id="msg">나쁨</span></p>
+        <button onclick="oepnclose()">추억 저장하기</button>
     </div>
     <div class="mypostingbox" id="postingbox">
         <div class="form-floating mb-3">
@@ -125,7 +133,7 @@
             <label for="floatingInput">앨범 날짜</label>
         </div>
         <div class="mybtn">
-            <button onclick="makeCard()" type ="button" class="btn btn-dark">기록하기</button>
+            <button onclick="makeCard()" type="button" class="btn btn-dark">기록하기</button>
             <button type="button" class="btn btn-outline-dark">닫기</button>
         </div>
     </div>
