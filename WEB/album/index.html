@@ -72,23 +72,66 @@
             margin-right: 5px;
         }
     </style>
-    <script>
-        $(document).ready(function () {
-            let url = "http://spartacodingclub.shop/sparta_api/seoulair";
-            fetch(url).then(res => res.json()).then(data => {
-                let mise = data['RealtimeCityAir']['row'][0]['IDEX_NM'];
-                $('#msg').text(mise);
-            })
-        })
-        function oepnclose() {
-            $('#postingbox').toggle();
-        }
+    <script type="module">
+        // Firebase SDK 라이브러리 가져오기
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        function makeCard() {
+
+        // Firebase 구성 정보 설정
+
+        const firebaseConfig = {
+            //info.txt 내용 넣기 (연습이기 때문에 .env 사용 x)
+        };
+
+
+
+        // Firebase 인스턴스 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        $("#postingbtn").click(async function () { // 데이터를 넣기 위함 (특정 태그 클릭 시 실행)
+
             let image = $('#image').val(); // id 값을 통해 값을 가져온다. val()함수
             let title = $('#title').val();
             let content = $('#content').val();
             let date = $('#date').val();
+            let doc = {
+                'image': image,
+                'title': title,
+                'content': content,
+                'date': date,
+            }; // 넣고 싶은 데이터
+            await addDoc(collection(db, "albums"), doc);
+            alert('저장완료');
+            window.location.reload();
+        })
+
+
+        $("#savebtn").click(async function () {
+            $('#postingbox').toggle();
+        });
+
+
+
+
+        let url = "http://spartacodingclub.shop/sparta_api/seoulair";
+        fetch(url).then(res => res.json()).then(data => {
+            let mise = data['RealtimeCityAir']['row'][0]['IDEX_NM'];
+            $('#msg').text(mise);
+        })
+
+
+        let docs = await getDocs(collection(db, "albums")); // 이전에 넣은 albums 에서 가져온다.
+        docs.forEach((doc) => {
+            let row = doc.data();
+
+            let image = row['image']; // 위의 console 바탕으로 데이터를 가져온다.
+            let title = row['title'];
+            let content = row['content'];
+            let date = row['date'];
 
             let temp_html = `
            <div class="col">
@@ -105,7 +148,9 @@
                 </div>
             </div>`;
             $('#card').append(temp_html);
-        }
+        });
+
+       
     </script>
 </head>
 
@@ -113,7 +158,7 @@
     <div class="mytitle">
         <h1>나만의 추억앨범</h1>
         <p>현재 서울의 미세먼지 : <span id="msg">나쁨</span></p>
-        <button onclick="oepnclose()">추억 저장하기</button>
+        <button id="savebtn">추억 저장하기</button>
     </div>
     <div class="mypostingbox" id="postingbox">
         <div class="form-floating mb-3">
@@ -133,7 +178,7 @@
             <label for="floatingInput">앨범 날짜</label>
         </div>
         <div class="mybtn">
-            <button onclick="makeCard()" type="button" class="btn btn-dark">기록하기</button>
+            <button id="postingbtn" type="button" class="btn btn-dark">기록하기</button>
             <button type="button" class="btn btn-outline-dark">닫기</button>
         </div>
     </div>
