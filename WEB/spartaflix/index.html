@@ -32,55 +32,91 @@
             width: 1200px;
             margin: 20px auto 20px auto;
         }
-        .mypostingbox{
-            width : 500px;
+
+        .mypostingbox {
+            width: 500px;
             margin: 20px auto 20px auto;
-            
-            border : 1px solid white;
-            padding : 20px;
+
+            border: 1px solid white;
+            padding: 20px;
             border-radius: 5px;
 
         }
 
-        .form-floating > input {
+        .form-floating>input {
             background-color: transparent;
-            color : white;
+            color: white;
 
         }
 
-        .form-floating > label {
-            color : white;
+        .form-floating>label {
+            color: white;
         }
 
-        .input-group > label {
+        .input-group>label {
             background-color: transparent;
-            color : white;
+            color: white;
         }
 
-        .mypostingbox > button{
+        .mypostingbox>button {
             width: 100%;
         }
-
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script>
-         $(document).ready(function () {
-            let url = "http://spartacodingclub.shop/sparta_api/weather/seoul";
-            fetch(url).then(res => res.json()).then(data => {
-               
-                let temp = data['temp'];
-                $('#temp').text(temp);
-            })
+    <script type="module">
+
+        // Firebase SDK 라이브러리 가져오기
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            //info.txt 참고
+        };
+
+        // Firebase 인스턴스 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+
+        $("#postingbtn").click(async function () { // 데이터를 넣기 위함 (특정 태그 클릭 시 실행)
+
+            let image = $('#image').val(); // id 값을 통해 값을 가져온다. val()함수
+            let title = $('#title').val();
+            let star = $('#star').val();
+            let comment = $('#comment').val();
+
+            let doc = {
+                'image': image,
+                'title': title,
+                'star': star,
+                'comment': comment,
+            }; // 넣고 싶은 데이터
+            await addDoc(collection(db, "movies"), doc);
+            alert('저장완료');
+            window.location.reload();
         })
 
-        function openclose(){
-            $('#postingbox').toggle();
-        }
-        function makeCard(){
-            let image = $('#image').val();
-            let title = $('#title').val();
-            let comment = $('#comment').val();
-            let star = $('#star').val();
+
+
+        let url = "http://spartacodingclub.shop/sparta_api/weather/seoul";
+        fetch(url).then(res => res.json()).then(data => {
+
+            let temp = data['temp'];
+            $('#temp').text(temp);
+        })
+
+
+
+        let docs = await getDocs(collection(db, "movies")); // 이전에 넣은 movies 에서 가져온다.
+        docs.forEach((doc) => {
+            let row = doc.data();
+
+            let image = row['image'];
+            let title = row['title'];
+            let comment = row['comment'];
+            let star = row['star'];
 
             let temp_html = `<div class="col">
                 <div class="card h-100">
@@ -96,8 +132,22 @@
 
             $('#card').append(temp_html);
 
-  
+        });
+
+
+
+
+
+
+
+        function openclose() {
+            $('#postingbox').toggle();
         }
+
+
+        $("#savebtn").click(async function () {
+            $('#postingbox').toggle();
+        });
     </script>
 </head>
 
@@ -135,10 +185,10 @@
     <div class="main">
         <div class="p-5 mb-4 bg-body-tertiary rounded-3">
             <div class="container-fluid py-5">
-                <h1  class="display-5 fw-bold">킹덤</h1>
+                <h1 class="display-5 fw-bold">킹덤</h1>
                 <p class="col-md-8 fs-4">병든 왕을 둘러싸고 흉흉한 소문이 떠돈다. 어둠에 뒤덮인 조선, 기이한 역병에 신음하는 산하. 정체 모를 악에 맞서 백성을 구원할 희망은 오직
                     세자뿐이다.</p>
-                <button onclick="openclose()" type="button" class="btn btn-outline-light">영화기록하기</button>
+                <button id="savebtn" type="button" class="btn btn-outline-light">영화기록하기</button>
                 <button type="button" class="btn btn-outline-light">상세정보</button>
 
             </div>
@@ -158,71 +208,27 @@
         <div class="input-group mb-3">
             <label class="input-group-text" for="inputGroupSelect01">별점</label>
             <select class="form-select" id="star">
-              <option selected>별점 선택</option>
-              <option value="⭐">⭐</option>
-              <option value="⭐⭐">⭐⭐</option>
-              <option value="⭐⭐⭐">⭐⭐⭐</option>
-              <option value="⭐⭐⭐⭐">⭐⭐⭐⭐</option>
-              <option value="⭐⭐⭐⭐⭐">⭐⭐⭐⭐⭐</option>
+                <option selected>별점 선택</option>
+                <option value="⭐">⭐</option>
+                <option value="⭐⭐">⭐⭐</option>
+                <option value="⭐⭐⭐">⭐⭐⭐</option>
+                <option value="⭐⭐⭐⭐">⭐⭐⭐⭐</option>
+                <option value="⭐⭐⭐⭐⭐">⭐⭐⭐⭐⭐</option>
             </select>
-          </div>
+        </div>
 
         <div class="form-floating mb-3">
             <input type="email" class="form-control" id="comment" placeholder="추천 이유">
             <label for="floatingInput">추천 이유</label>
         </div>
-        <button onclick="makeCard()" type="button" class="btn btn-danger">기록하기</button>
+        <button id="postingbtn" type="button" class="btn btn-danger">기록하기</button>
     </div>
 
     <div class="mycards">
         <div id="card" class="row row-cols-1 row-cols-md-4 g-4">
-            <div class="col">
-                <div class="card h-100">
-                    <img src="https://movie-phinf.pstatic.net/20210728_221/1627440327667GyoYj_JPEG/movie_image.jpg"
-                        class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">영화 제목</h5>
-                        <p class="card-text">⭐⭐⭐</p>
-                        <p class="card-text">영화 코멘트</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col">
-                <div class="card h-100">
-                    <img src="https://movie-phinf.pstatic.net/20210728_221/1627440327667GyoYj_JPEG/movie_image.jpg"
-                        class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">영화 제목</h5>
-                        <p class="card-text">⭐⭐⭐</p>
-                        <p class="card-text">영화 코멘트</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col">
-                <div class="card h-100">
-                    <img src="https://movie-phinf.pstatic.net/20210728_221/1627440327667GyoYj_JPEG/movie_image.jpg"
-                        class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">영화 제목</h5>
-                        <p class="card-text">⭐⭐⭐</p>
-                        <p class="card-text">영화 코멘트</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col">
-                <div class="card h-100">
-                    <img src="https://movie-phinf.pstatic.net/20210728_221/1627440327667GyoYj_JPEG/movie_image.jpg"
-                        class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">영화 제목</h5>
-                        <p class="card-text">⭐⭐⭐</p>
-                        <p class="card-text">영화 코멘트</p>
-                    </div>
-                </div>
-            </div>
 
         </div>
     </div>
